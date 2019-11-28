@@ -1,5 +1,3 @@
-require('parser')
-
 local _ctx = context() 
 
 print[[

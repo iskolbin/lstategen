@@ -1,0 +1,6 @@
+test/state.h
+test/serialize.h
+test/deserialize.h
+*.swp
+a.out
+dummy.json

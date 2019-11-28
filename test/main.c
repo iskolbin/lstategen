@@ -2,7 +2,7 @@ struct DummyExternStruct {
 	float value;
 };
 
-#include "dummy.h"
+#include "state.h"
 #include "serialize.h"
 #include "deserialize.h"
 

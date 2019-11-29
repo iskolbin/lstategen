@@ -23,9 +23,14 @@ end
 function declare(typename, t)
 	_ctx.isdeclared[typename] = true
 	_G[typename] = function(...)
-		local arr, args = {}, {...}
-		for i, v in ipairs(args) do
-			arr[i] = '[' .. v .. ']'
+		local arr, args, bitfield = {}, {...}, ''
+		if args[1] == ':' then
+			bitfield = ':' .. tonumber(args[2])
+			args = {}
+		else
+			for i, v in ipairs(args) do
+				arr[i] = '[' .. v .. ']'
+			end
 		end
 		return function(name, indices)
 			if name == '#' then
@@ -35,7 +40,7 @@ function declare(typename, t)
 			elseif indices then
 				return name .. (#indices > 0 and '[' .. table.concat(indices,'][') .. ']' or '')
 			else
-				return (t and t .. ' ' or '') .. typename .. ' ' .. name .. table.concat(arr)
+				return (t and t .. ' ' or '') .. typename .. ' ' .. name .. table.concat(arr) .. bitfield
 			end
 		end
 	end
@@ -45,6 +50,10 @@ function declare_std()
 	declare [[bool]]
 	declare [[char]]
 	declare [[int]]
+	declare [[short]]
+	declare [[long]]
+	declare [[unsigned]]
+	declare [[signed]]
 	declare [[float]]
 	declare [[double]]
 	declare [[int8_t]]

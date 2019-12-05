@@ -20,6 +20,12 @@ function context()
 	return _ctx
 end
 
+function static_string(...)
+	local arr = {...}
+	arr[#arr] = arr[#arr] .. [[+1]]
+	return char((table.unpack or unpack)(arr))
+end
+
 function declare(typename, t)
 	_ctx.isdeclared[typename] = true
 	_G[typename] = function(...)

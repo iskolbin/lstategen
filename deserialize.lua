@@ -625,12 +625,7 @@ static void ${PREFIX}IgnoreValue(${CONTEXT} *ctx) {
 for _, name_t_members in ipairs(_ctx.typedefs) do
 	local name, t, members = table.unpack(name_t_members)
 	if t == 'struct' then
-		local keys = {}
 		local shift = ''
-		for k in pairs(members) do
-			keys[#keys+1] = k
-		end
-		table.sort(keys)
 		print('int ' .. PREFIX .. name .. '(' .. CONTEXT .. ' *ctx, struct ' .. name .. ' *self) {')
 		print('#ifdef ' .. PREFIX .. 'DEBUG')
 		print(INDENT .. 'TraceLog(LOG_INFO, "%d %d %.*s", ctx->index, ctx->t[ctx->index].type, ctx->t[ctx->index].end - ctx->t[ctx->index].start, ctx->str + ctx->t[ctx->index].start);')
@@ -639,10 +634,11 @@ for _, name_t_members in ipairs(_ctx.typedefs) do
 		print(INDENT:rep(1) .. 'int nkeys = ctx->t[ctx->index].size;')
 		print(INDENT:rep(1) .. 'for (int i = 0; i < nkeys; i++) {')
 		print(INDENT:rep(2) .. 'int keyindex = ++ctx->index;')
-		for i, k in ipairs(keys) do 
+		for _, name_type in ipairs(members) do
+			local k, field_type = next(name_type)
 			print(INDENT:rep(2) .. 'if (' .. PREFIX .. 'StringEqual(ctx->str, &ctx->t[keyindex], "' .. k ..'") == 0) {')
-			local limits = members[k]'#'
-			local typename = members[k]'@'
+			local limits = field_type'#'
+			local typename = field_type'@'
 			local indices = {}
 
 			for i, limit in ipairs(limits) do
@@ -653,7 +649,7 @@ for _, name_t_members in ipairs(_ctx.typedefs) do
 					print(INDENT:rep(i+2) .. 'if (ctx->t[ctx->index].type == ' .. PREFIX .. 'JSMN_STRING) {')
 					print(INDENT:rep(i+3) .. 'max_' .. index .. ' = ctx->t[ctx->index].end - ctx->t[ctx->index].start;')
 					print(INDENT:rep(i+3) .. 'if (max_' .. index .. ' > ' .. limits[i] ..' - 1) max_' .. index .. ' = ' .. limits[i] .. ' - 1;')
-					print(INDENT:rep(i+3) .. 'strncpy(self->' .. members[k](k, indices) ..', ctx->str + ctx->t[ctx->index].start, max_' .. index .. ');')
+					print(INDENT:rep(i+3) .. 'strncpy(self->' .. field_type(k, indices) ..', ctx->str + ctx->t[ctx->index].start, max_' .. index .. ');')
 					print(INDENT:rep(i+2) .. '} else return ' .. PREFIX .. 'WRONG_FIELD_TYPE;')
 				else
 					indices[i] = index
@@ -664,7 +660,7 @@ for _, name_t_members in ipairs(_ctx.typedefs) do
 
 			if typename ~= 'char' then
 				local indent = INDENT:rep(#limits+3)
-				local itemname = 'self->' .. members[k](k, indices)
+				local itemname = 'self->' .. field_type(k, indices)
 				local deserializer = DESERIALIZERS[typename]
 				print(indent .. 'ctx->index++;')
 				if deserializer then

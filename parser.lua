@@ -99,8 +99,9 @@ function struct(name)
 	else
 		return function(t)
 			local n = 0
-			for k, v in pairs(t) do
+			for _, v in ipairs(t) do
 				n = n + 1
+				local k = next(v)
 				assert(type(k) == 'string', 'Struct field name must my string')
 			end
 			_ctx.fieldscount[name] = n

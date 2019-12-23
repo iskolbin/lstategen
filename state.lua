@@ -31,13 +31,9 @@ for _, name_t_members in ipairs(_ctx.typedefs) do
 			end
 		end
 	elseif t == 'struct' then
-		local keys = {}
-		for k in pairs(members) do
-			keys[#keys+1] = k
-		end
-		table.sort(keys)
-		for _, k in ipairs(keys) do
-			print('  ' .. members[k](k) .. ';')
+		for _, name_type in ipairs(members) do
+			local field_name, field_type = next(name_type)
+			print('  ' .. field_type(field_name) .. ';')
 		end
 	else
 		error('Unimplemented type ' .. tostring(t))

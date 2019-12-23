@@ -37,15 +37,11 @@ for _, name_t_members in ipairs(_ctx.typedefs) do
 		print('void ' .. PREFIX .. name .. '(FILE *f, struct ' .. name .. ' *self) {')
 		print(INDENT .. 'bool isdefault, isfirst = true; char *data;')
 		print(INDENT .. 'fprintf(f, \"{\");')
-		local keys = {}
-		for k in pairs(members) do
-			keys[#keys+1] = k
-		end
-		table.sort(keys)
-		for i, k in ipairs(keys) do
+		for _, name_type in ipairs(members) do
+			local k, field_type = next(name_type)
 			local indices = {}
-			local limits = members[k]'#'
-			local typename = members[k]'@'
+			local limits = field_type'#'
+			local typename = field_type'@'
 			print(INDENT .. 'isdefault = true; data = (char *)&self->' .. k .. ';')
 			print(INDENT .. 'for (int i = 0; i < sizeof(self->' .. k .. '); i++) {')
 			print(INDENT:rep(2) .. 'if (data[i] != 0) {isdefault = false; break;}')
@@ -56,7 +52,7 @@ for _, name_t_members in ipairs(_ctx.typedefs) do
 			for i, limit in ipairs(limits) do
 				local index = INDICES[i]
 				if typename == 'char' and i == #limits then
-					print(INDENT:rep(i+1) .. 'fprintf(f, "\\\"%s\\\"", self->' .. members[k](k, indices) .. ');')
+					print(INDENT:rep(i+1) .. 'fprintf(f, "\\\"%s\\\"", self->' .. field_type(k, indices) .. ');')
 				else
 					indices[i] = index
 					print(INDENT:rep(i+1) .. 'fprintf(f, "[");')
@@ -65,7 +61,7 @@ for _, name_t_members in ipairs(_ctx.typedefs) do
 			end
 
 			if typename ~= 'char' then
-				local itemname = 'self->' .. members[k](k, indices)
+				local itemname = 'self->' .. field_type(k, indices)
 				local serializer = SERIALIZERS[typename]
 				if serializer then
 					print(INDENT:rep(#limits+2) .. serializer:format(itemname))
